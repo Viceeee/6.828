@@ -9,7 +9,7 @@
 ## The C programming language chap5.1-5.5
 ### chap5.1 讲了指针的原理就是指针指向地址(title:pointers and address)和一元运算符&和指针符 * 和双重指针  
 ### chap5.2 **&a is a pointer to a [^ ~~ * a is a pointer to a ~~]:nonono * a is not a pointer to a because pointer means address to a value not a value!!!!!!**
- 
+### chap5.3  
 ****
 
 exercises5.1 need to be done,copy this file to here 
@@ -18,6 +18,5 @@ exercises5.1 need to be done,copy this file to here
 
 ## 为什么会有实模式和保护模式？
 因为一开始计算机是只有20 位的，能够直接操作物理地址，实模式是直接操作在真实物理地址上的，20位的1MB空间比较好管理一点，所以就比较容易管理,但是目前是32位和64位，所以更加难以管理，所以引进了保护模式，同时也引进了内存管理(分页管理那些的),现代的计算机一开始都是运行与实模式上的，就是一开始启动的时候是直接实模式，后面成功启动后就是保护模式，这时的虚拟内存那些的就出来了。
-
 
 
