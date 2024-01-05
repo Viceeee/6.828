@@ -6,10 +6,11 @@ f(void)
 {
    int a[4];
    int *b = malloc(16);
-   int *c;
+   int *c = NULL;
    int i;
 
-   printf("1: a = %p, b = %p, c = %p\n", a, b, c);
+
+   printf("1: a = %p, b = %p, c = %p,c=%d\n", a, b, c, c);
    c = a;//形成双重指针，意思是在指针的数据域里也是一个指向数组a的指针
    for (i = 0; i < 4; i++)
 	 a[i] = 100 + i;
