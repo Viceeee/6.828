@@ -19,4 +19,9 @@ exercises5.1 need to be done,copy this file to here
 ## 为什么会有实模式和保护模式？
 因为一开始计算机是只有20 位的，能够直接操作物理地址，实模式是直接操作在真实物理地址上的，20位的1MB空间比较好管理一点，所以就比较容易管理,但是目前是32位和64位，所以更加难以管理，所以引进了保护模式，同时也引进了内存管理(分页管理那些的),现代的计算机一开始都是运行与实模式上的，就是一开始启动的时候是直接实模式，后面成功启动后就是保护模式，这时的虚拟内存那些的就出来了。
 
+### 6.828 chap  Loading the Kernel 
+解释了JOS的顶层设计：使用了objdump展示了JOS obj/kern/kernel program-header 
+					    obj/kern/kernel section-header
+					    obj/boot/boot.out section-header
+
 
