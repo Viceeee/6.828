@@ -25,3 +25,10 @@ exercises5.1 need to be done,copy this file to here
 					    obj/boot/boot.out section-header
 
 
+#### exercises 5
+不明白为什么我的在boot/Makefrag中的第28行修改成0x7c01，然后gdb会卡在
+[   0:7c30] => 0x7c30:	ljmp   $0x8,$0x7c36
+这里，为什么我把它修改成7c01就变成7c30了？
+
+
+
