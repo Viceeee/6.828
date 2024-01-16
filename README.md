@@ -31,5 +31,18 @@ exercises5.1 need to be done,copy this file to here
 这里，为什么我把它修改成7c01就变成7c30了？
 所以这里后面才会有part 3 的事情吧？
 
+### exercises 7
+在经过这个提示后The target architecture is set to "i386".后，使用x *0x00100000和x *0xf0100000 由原来的
 
+(gdb) x *0x00100000
+   0x0:	add    %al,(%bx,%si)
+(gdb) x *0xf0100000
+   0x0:	add    %al,(%bx,%si)
 
+The target architecture is set to "i386"
+(gdb) x *0x00100000
+   0x0:	add    %al,(%eax)
+(gdb) x *0xf0100000
+   0x0:	add    %al,(%eax)
+
+我个人对于这个变化的猜测是因为是检测到了i386以后eax寄存器就可以直接取代由(%bx,%si)寄存器组成的寄存器？
