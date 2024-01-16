@@ -46,3 +46,19 @@ The target architecture is set to "i386"
    0x0:	add    %al,(%eax)
 
 我个人对于这个变化的猜测是因为是检测到了i386以后eax寄存器就可以直接取代由(%bx,%si)寄存器组成的寄存器？
+
+(gdb) x 0x00100000
+   0x100000:	add    %al,(%bx,%si)
+(gdb) x 0xf0100000
+   0xf0100000 <_start-268435468>:	add    %al,(%bx,%si)
+(gdb) si
+The target architecture is set to "i386".
+=> 0xfd18f:	mov    $0x10,%eax
+0x000fd18f in ?? ()
+(gdb) x 0x00100000
+   0x100000:	add    %al,(%eax)
+(gdb) x 0xf0100000
+   0xf0100000 <_start-268435468>:	add    %al,(%eax)
+
+
+结束了实验以后我说的这个不一定正确，我的视角有问题，并不应该关注于寄存器上面，而是应该关注在地址上。在把kern/entry.S 注释掉以后，因为现在还没有进行map，所以就只有256MB，256MB的物理地址应该是从0x00000000-0xf0000000之间，所以这个第二个examine检查的是超过了256MB的内存，所以才会有<_start-268435468>这个东西
