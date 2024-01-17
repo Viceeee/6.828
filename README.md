@@ -62,3 +62,17 @@ The target architecture is set to "i386".
 
 
 结束了实验以后我说的这个不一定正确，我的视角有问题，并不应该关注于寄存器上面，而是应该关注在地址上。在把kern/entry.S 注释掉以后，因为现在还没有进行map，所以就只有256MB，256MB的物理地址应该是从0x00000000-0xf0000000之间，所以这个第二个examine检查的是超过了256MB的内存，所以才会有<_start-268435468>这个东西
+
+
+### exercises 8
+修补printfmt.c里面的%o
+
+#### after exercises 8
+1、
+2、
+3、
+4、
+
+
+
+
