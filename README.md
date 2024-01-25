@@ -15,7 +15,10 @@
 #### 
 ## The C programming language chap5.1-5.5
 ### chap5.1 讲了指针的原理就是指针指向地址(title:pointers and address)和一元运算符&和指针符 * 和双重指针  
-### chap5.2 **&a is a pointer to a [^ ~~ * a is a pointer to a ~~]:nonono * a is not a pointer to a because pointer means address to a value not a value!!!!!!**
+### chap5.2 
+
+**&a is a pointer to a  ~~* a is a pointer to a~~ :nonono * a is not a pointer to a because pointer means address to a value pointer is not a value!!!!!!**
+
 ### chap5.3  
 ****
 
@@ -34,7 +37,7 @@ exercises5.1 need to be done,copy this file to here
 
 #### exercises 5
 不明白为什么我的在boot/Makefrag中的第28行修改成0x7c01，然后gdb会卡在
-[   0:7c30] => 0x7c30:	ljmp   $0x8,$0x7c36
+[ 0:7c30] => 0x7c30:	ljmp   $0x8,$0x7c36
 这里，为什么我把它修改成7c01就变成7c30了？
 所以这里后面才会有part 3 的事情吧？
 
@@ -84,8 +87,22 @@ The target architecture is set to "i386".
 
 #### after exercises 8
 1、console.c里面的是比较底层的端口比如说COM这类串行的端口,console应该是接收电平输入的端口？printf.c里面是封装了console.c的底层函数和printfmt.c的处理函数，让其能够直接使用？
+printf.c 通过putch()这个函数调用console.c里的cputchar()，这个cputchar是封装了console.c里cons_putc()这个函数的，是和cons_putc这个函数相比更加high-level的I/O函数，能够直接使用来读行(readline)和打印，而这个函数调用了console.c里的serial_putc()函数，这个函数又用调用了inc/x86.h里的inb函数。
 
-2、
+2、猜测是屏幕一行打满了以后换行的作用，
+
+```C
+if (crt_pos >= CRT_SIZE) {
+             int i;
+             memmove(crt_buf, crt_buf + CRT_COLS, (CRT_SIZE - CRT_COLS) * sizeof(uint16_t));
+             for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; i++)
+                     crt_buf[i] = 0x0700 | ' ';
+             crt_pos -= CRT_COLS;
+}
+```
+
+
+
 3、
 4、
 
