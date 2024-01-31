@@ -94,14 +94,14 @@ printf.c 通过putch()这个函数调用console.c里的cputchar()，这个cputch
 ```C
 if (crt_pos >= CRT_SIZE) {
              int i;
-             memmove(crt_buf, crt_buf + CRT_COLS, (CRT_SIZE - CRT_COLS) * sizeof(uint16_t));
-             for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; i++)
+             memmove(crt_buf, crt_buf + CRT_COLS, (CRT_SIZE - CRT_COLS) * sizeof(uint16_t));//直接将buf移动到新的地方
+             for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; i++)/超过buf的部分把crt_buf置为0x700或者是' '?
                      crt_buf[i] = 0x0700 | ' ';
-             crt_pos -= CRT_COLS;
+             crt_pos -= CRT_COLS;//重置crt_pos
 }
 ```
 
-
+感觉不是？应该是这个指示针的位置?假如超过这整个屏幕的size就直接换新的页？
 
 3、
 4、
