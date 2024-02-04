@@ -86,16 +86,17 @@ The target architecture is set to "i386".
 修补printfmt.c里面的%o
 
 #### after exercises 8
-1、console.c里面的是比较底层的端口比如说COM这类串行的端口,console应该是接收电平输入的端口？printf.c里面是封装了console.c的底层函数和printfmt.c的处理函数，让其能够直接使用？
+1.console.c里面的是比较底层的端口比如说COM这类串行的端口,console应该是接收电平输入的端口？printf.c里面是封装了console.c的底层函数和printfmt.c的处理函数，让其能够直接使用？
+
 printf.c 通过putch()这个函数调用console.c里的cputchar()，这个cputchar是封装了console.c里cons_putc()这个函数的，是和cons_putc这个函数相比更加high-level的I/O函数，能够直接使用来读行(readline)和打印，而这个函数调用了console.c里的serial_putc()函数，这个函数又用调用了inc/x86.h里的inb函数。
 
-2、猜测是屏幕一行打满了以后换行的作用，
+2.猜测是屏幕一行打满了以后换行的作用。
 
 ```C
 if (crt_pos >= CRT_SIZE) {
              int i;
              memmove(crt_buf, crt_buf + CRT_COLS, (CRT_SIZE - CRT_COLS) * sizeof(uint16_t));//直接将buf移动到新的地方
-             for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; i++)/超过buf的部分把crt_buf置为0x700或者是' '?
+             for (i = CRT_SIZE - CRT_COLS; i < CRT_SIZE; i++)//超过buf的部分把crt_buf置为0x700或者是' '?
                      crt_buf[i] = 0x0700 | ' ';
              crt_pos -= CRT_COLS;//重置crt_pos
 }
@@ -103,8 +104,171 @@ if (crt_pos >= CRT_SIZE) {
 
 感觉不是？应该是这个指示针的位置?假如超过这整个屏幕的size就直接换新的页？
 
-3、
-4、
 
 
+3.lecture 2 Note:GCC x86 calling conventions:
+
+> - GCC dictates how the stack is used. Contract between caller and callee on x86: 
+>   - at entry to a function (i.e. just after call): 
+>     - %eip points at first instruction of function
+>     - %esp+4 points at first argument
+>     - %esp points at return address
+>   - after ret instruction:
+>     - %eip contains return address
+>     - %esp points at arguments pushed by caller
+>     - called function may have trashed arguments
+>     - %eax (and %edx, if return type is 64-bit) contains return value (or trash if function is `void`)
+>     - %eax, %edx (above), and %ecx may be trashed
+>     - %ebp, %ebx, %esi, %edi must contain contents from time of `call`
+>   - Terminology:
+>     - %eax, %ecx, %edx are "caller save" registers
+>     - %ebp, %ebx, %esi, %edi are "callee save" registers
+> - Functions can do anything that doesn't violate contract. By convention, GCC does more:
+>   - each function has a stack frame marked by %ebp, %esp
+>   
+>   - Functions can do anything that doesn't violate contract. By convention, GCC does more:
+>   
+>     - each function has a stack frame marked by %ebp, %esp
+>   
+>       ```
+>       		       +------------+   |
+>       		       | arg 2      |   \
+>       		       +------------+    >- previous function's stack frame
+>       		       | arg 1      |   /
+>       		       +------------+   |
+>       		       | ret %eip   |   /
+>       		       +============+   
+>       		       | saved %ebp |   \
+>       		%ebp-> +------------+   |
+>       		       |            |   |
+>       		       |   local    |   \
+>       		       | variables, |    >- current function's stack frame
+>       		       |    etc.    |   /
+>       		       |            |   |
+>       		       |            |   |
+>       		%esp-> +------------+   /
+>       		
+>       ```
+>   
+>     - %esp can move to make stack frame bigger, smaller
+>   
+>     - %ebp points at saved %ebp from previous function, chain to walk stack
+>   
+>     - function prologue:
+>   
+>       ```
+>       			pushl %ebp
+>       			movl %esp, %ebp
+>       		
+>       ```
+>   
+>       or
+>   
+>       ```
+>       			enter $0, $0
+>       		
+>       ```
+>   
+>       enter usually not used: 4 bytes vs 3 for pushl+movl, not on hardware fast-path anymore
+>   
+>     - function epilogue can easily find return EIP on stack:
+>   
+>       ```
+>       			movl %ebp, %esp
+>       			popl %ebp
+>       		
+>       ```
+>   
+>       or
+>   
+>       ```
+>       			leave
+>       		
+>       ```
+>   
+>       leave used often because it's 1 byte, vs 3 for movl+popl
+>   
+>   - Big example:
+>   
+>     - C code
+>   
+>       ```
+>       		int main(void) { return f(8)+1; }
+>       		int f(int x) { return g(x); }
+>       		int g(int x) { return x+3; }
+>       		
+>       ```
+>   
+>     - assembler
+>   
+>       ```
+>       		_main:
+>       					prologue
+>       			pushl %ebp
+>       			movl %esp, %ebp
+>       					body
+>       			pushl $8
+>       			call _f
+>       			addl $1, %eax
+>       					epilogue
+>       			movl %ebp, %esp
+>       			popl %ebp
+>       			ret
+>       		_f:
+>       					prologue
+>       			pushl %ebp
+>       			movl %esp, %ebp
+>       					body
+>       			pushl 8(%esp)
+>       			call _g
+>       					epilogue
+>       			movl %ebp, %esp
+>       			popl %ebp
+>       			ret
+>       
+>       		_g:
+>       					prologue
+>       			pushl %ebp
+>       			movl %esp, %ebp
+>       					save %ebx
+>       			pushl %ebx
+>       					body
+>       			movl 8(%ebp), %ebx
+>       			addl $3, %ebx
+>       			movl %ebx, %eax
+>       					restore %ebx
+>       			popl %ebx
+>       					epilogue
+>       			movl %ebp, %esp
+>       			popl %ebp
+>       			ret
+>       		
+>       ```
+>   
+>   - Super-small _g:
+>   
+>     ```
+>     		_g:
+>     			movl 4(%esp), %eax
+>     			addl $3, %eax
+>     			ret
+>     	
+>     ```
+>   
+>   - Shortest `_f`?
+>   
+>   - Compiling, linking, loading:
+>   
+>     - *Preprocessor* takes C source code (ASCII text), expands #include etc, produces C source code
+>     - *Compiler* takes C source code (ASCII text), produces assembly language (also ASCII text)
+>     - *Assembler* takes assembly language (ASCII text), produces `.o` file (binary, machine-readable!)
+>     - *Linker* takes multiple '`.o`'s, produces a single *program image* (binary)
+>     - *Loader* loads the program image into memory at run-time and starts it executing
+
+大概意思就是 %eax %ecx %edx %esi等这些寄存器和GCC和函数之间的关系，第三个问题就是要我们使用单步调试将下面的代码转换成汇编代码
+
+```c
+int x = 1, y = 3, z = 4;
+cprintf("x %d, y %x, z %d\n", x, y, z);
+```
 
